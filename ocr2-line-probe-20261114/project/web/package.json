@@ -1,0 +1,17 @@
+{
+  "name": "coupon-mobile",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "node start.cjs",
+    "test": "node verify.cjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "sharp": "0.35.5",
+    "tesseract.js": "^6.0.0",
+    "playwright": "1.56.1"
+  }
+}

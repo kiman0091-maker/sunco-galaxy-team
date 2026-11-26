@@ -1,0 +1,29 @@
+plugins { id 'com.android.application' }
+android {
+    namespace 'kr.sunco.ocrtrial'
+    compileSdk 35
+    defaultConfig { applicationId 'kr.sunco.lab.ocr2lineprobe'; minSdk 29; targetSdk 35; versionCode 5602; versionName '0.2.0-ocr-line-probe' }
+    signingConfigs {
+        r11Lab {
+            storeFile file(System.getenv('SUNCOO_R11_KEYSTORE') ?: "$rootDir/.r11-keys/not-created.p12")
+            storePassword System.getenv('SUNCOO_R11_KEYPASS') ?: ''
+            keyAlias 'sunco-r11-test'
+            keyPassword System.getenv('SUNCOO_R11_KEYPASS') ?: ''
+        }
+    }
+    buildTypes { debug { signingConfig signingConfigs.r11Lab } }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+}
+androidComponents { beforeVariants(selector().withBuildType('release')) { variant -> variant.enable = false } }
+// Compile/preparation is permitted. Packaging requires a future explicit approval.
+gradle.taskGraph.whenReady { graph ->
+    if (graph.allTasks.any { it.name ==~ /(?i)(assemble.*|bundle.*|install.*|packageDebug|packageRelease|validateSigning.*)/ }) {
+        if (System.getenv('SUNCOO_R11_ALLOW_APK') != 'EXPLICITLY_APPROVED') throw new GradleException('R11: APK creation is not approved')
+        def ks = System.getenv('SUNCOO_R11_KEYSTORE')
+        if (!ks || new File(ks).name != 'sunco-r11-test.p12' || !System.getenv('SUNCOO_R11_KEYPASS')) throw new GradleException('R11: dedicated test signing inputs required')
+    }
+}
+dependencies {
+    implementation 'com.google.mlkit:text-recognition:16.0.1'
+    implementation 'com.google.mlkit:text-recognition-korean:16.0.1'
+}
